@@ -1,6 +1,7 @@
 package org.moreunit.mock.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -57,7 +58,8 @@ public class Dependencies extends ArrayList<Dependency>
 
             for (int i = 0; i < parameterNames.length; i++)
             {
-                Dependency dependency = new Dependency(resolveTypeSignature(parameterTypes[i]), parameterNames[i]);
+                String signature = Signature.toString(parameterTypes[i]);
+                Dependency dependency = new Dependency(resolveTypeSignature(signature), parameterNames[i], resolveTypeParameters(signature));
                 if(! contains(dependency))
                 {
                     constructorDependencies.add(dependency);
@@ -74,7 +76,8 @@ public class Dependencies extends ArrayList<Dependency>
             String methodName = method.getElementName();
             if(method.getNumberOfParameters() == 1 && SETTER_PATTERN.matcher(methodName).matches())
             {
-                SetterDependency dependency = new SetterDependency(resolveTypeSignature(method.getParameterTypes()[0]), methodName);
+                String signature = Signature.toString(method.getParameterTypes()[0]);
+                SetterDependency dependency = new SetterDependency(resolveTypeSignature(signature), methodName, resolveTypeParameters(signature));
                 if(! contains(dependency))
                 {
                     setterDependencies.add(dependency);
@@ -84,10 +87,9 @@ public class Dependencies extends ArrayList<Dependency>
         }
     }
 
-    private String resolveTypeSignature(String typeSignature) throws JavaModelException
+    private String resolveTypeSignature(String signature) throws JavaModelException
     {
-        String fieldTypeString = Signature.toString(typeSignature);
-        String[][] possibleFieldTypes = classUnderTest.resolveType(fieldTypeString);
+        String[][] possibleFieldTypes = classUnderTest.resolveType(signature);
 
         if(possibleFieldTypes.length != 0)
         {
@@ -96,7 +98,7 @@ public class Dependencies extends ArrayList<Dependency>
         }
         else
         {
-            return fieldTypeString;
+            return signature;
         }
     }
 
@@ -106,7 +108,8 @@ public class Dependencies extends ArrayList<Dependency>
         {
             if(isVisibleToTestCase(field) && isAssignable(field))
             {
-                Dependency dependency = new Dependency(resolveTypeSignature(field.getTypeSignature()), field.getElementName());
+                String signature = Signature.toString(field.getTypeSignature());
+                Dependency dependency = new Dependency(resolveTypeSignature(signature), field.getElementName(), resolveTypeParameters(signature));
                 if(! contains(dependency))
                 {
                     fieldDependencies.add(dependency);
@@ -114,6 +117,58 @@ public class Dependencies extends ArrayList<Dependency>
                 }
             }
         }
+    }
+
+    List<TypeParameter> resolveTypeParameters(String signature) throws JavaModelException
+    {
+        int indexOfAngleBracket = signature.indexOf('<');
+        if(indexOfAngleBracket != - 1)
+        {
+            return resolveTypeParameters(signature.toCharArray(), new StringIterator(signature, indexOfAngleBracket + 1));
+        }
+        return new ArrayList<TypeParameter>();
+    }
+
+    private List<TypeParameter> resolveTypeParameters(char[] signatureBuffer, StringIterator iterator) throws JavaModelException
+    {
+        List<TypeParameter> parameters = new ArrayList<TypeParameter>();
+
+        StringBuilder buffer = new StringBuilder();
+        for (int i = iterator.current; iterator.hasNext(); i = iterator.next())
+        {
+            char c = signatureBuffer[i];
+            if(c == '<')
+            {
+                if(buffer.length() != 0)
+                {
+                    TypeParameter parameter = new TypeParameter(resolveTypeSignature(buffer.toString()));
+                    parameter.internalParameters.addAll(resolveTypeParameters(signatureBuffer, iterator.increment()));
+                    parameters.add(parameter);
+                    buffer = new StringBuilder();
+                }
+                continue;
+            }
+            if(c == ' ')
+            {
+                continue;
+            }
+            if(c == ',' || c == '>')
+            {
+                if(buffer.length() != 0)
+                {
+                    parameters.add(new TypeParameter(resolveTypeSignature(buffer.toString())));
+                    buffer = new StringBuilder();
+                }
+                if(c == '>')
+                {
+                    break;
+                }
+                continue;
+            }
+            buffer.append(c);
+        }
+
+        return parameters;
     }
 
     private boolean isVisibleToTestCase(IMember member) throws JavaModelException
@@ -132,5 +187,42 @@ public class Dependencies extends ArrayList<Dependency>
     private boolean isAssignable(IField field) throws JavaModelException
     {
         return (field.getFlags() & ClassFileConstants.AccFinal) == 0;
+    }
+
+    private static class StringIterator implements Iterator<Integer>
+    {
+        final int limit;
+        int current;
+
+        StringIterator(String string, int startIndex)
+        {
+            limit = string.length();
+            current = startIndex;
+        }
+
+        public StringIterator increment()
+        {
+            next();
+            return this;
+        }
+
+        public boolean hasNext()
+        {
+            return current < limit;
+        }
+
+        public Integer next()
+        {
+            if(! hasNext())
+            {
+                throw new IndexOutOfBoundsException();
+            }
+            return ++current;
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }

@@ -2,13 +2,21 @@ package org.moreunit.mock.model;
 
 import static org.moreunit.util.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SetterDependency extends Dependency
 {
     public final String setterMethodName;
 
     public SetterDependency(String fullyQualifiedClassName, String setterMethodName)
     {
-        super(fullyQualifiedClassName, dependencyNameFrom(setterMethodName));
+        this(fullyQualifiedClassName, setterMethodName, new ArrayList<TypeParameter>());
+    }
+
+    public SetterDependency(String fullyQualifiedClassName, String setterMethodName, List<TypeParameter> typeParameters)
+    {
+        super(fullyQualifiedClassName, dependencyNameFrom(setterMethodName), typeParameters);
         this.setterMethodName = setterMethodName;
     }
 

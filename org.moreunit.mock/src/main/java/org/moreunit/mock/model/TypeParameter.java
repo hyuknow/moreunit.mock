@@ -7,17 +7,18 @@ public class TypeParameter
 {
     public final String fullyQualifiedClassName;
     public final List<TypeParameter> internalParameters;
+    public final String simpleClassName;
 
     public TypeParameter(String fullyQualifiedClassName)
     {
-        this.fullyQualifiedClassName = fullyQualifiedClassName;
-        internalParameters = new ArrayList<TypeParameter>();
+        this(fullyQualifiedClassName, new ArrayList<TypeParameter>());
     }
 
     public TypeParameter(String fullyQualifiedClassName, List<TypeParameter> internalParameters)
     {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
         this.internalParameters = internalParameters;
+        simpleClassName = fullyQualifiedClassName.substring(fullyQualifiedClassName.lastIndexOf(".") + 1);
     }
 
     @Override

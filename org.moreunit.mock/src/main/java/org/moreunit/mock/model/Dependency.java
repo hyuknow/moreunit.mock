@@ -3,18 +3,28 @@ package org.moreunit.mock.model;
 import static org.moreunit.util.Preconditions.checkArgument;
 import static org.moreunit.util.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Dependency
 {
     public final String fullyQualifiedClassName;
     public final String simpleClassName;
     public final String name;
+    public final List<TypeParameter> typeParameters;
 
     public Dependency(String fullyQualifiedClassName, String name)
     {
+        this(fullyQualifiedClassName, name, new ArrayList<TypeParameter>());
+    }
+
+    public Dependency(String fullyQualifiedClassName, String name, List<TypeParameter> typeParameters)
+    {
         this.fullyQualifiedClassName = checkNotNull(fullyQualifiedClassName);
-        this.name = checkNotNull(name);
         checkArgument(! fullyQualifiedClassName.isEmpty());
+        this.name = checkNotNull(name);
         checkArgument(! name.isEmpty());
+        this.typeParameters = checkNotNull(typeParameters);
 
         simpleClassName = fullyQualifiedClassName.substring(fullyQualifiedClassName.lastIndexOf(".") + 1);
     }

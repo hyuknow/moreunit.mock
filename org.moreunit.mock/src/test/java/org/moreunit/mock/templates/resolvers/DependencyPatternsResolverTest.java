@@ -1,5 +1,6 @@
 package org.moreunit.mock.templates.resolvers;
 
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.moreunit.mock.model.Dependencies;
 import org.moreunit.mock.model.Dependency;
+import org.moreunit.mock.model.TypeParameter;
 import org.moreunit.mock.templates.MockingContext;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -87,5 +89,42 @@ public class DependencyPatternsResolverTest
                 .isEqualTo("a ${FooType:newType(pack.age.Foo)} b foo c" +
                            "a ${ThingType:newType(some.where.Thing)} b bar c" +
                            "a ${BlobClassType:newType(BlobClass)} b aBlob c");
+    }
+
+    @Test
+    public void should_add_one_type_parameter() throws Exception
+    {
+        // given
+        dependencies.add(new Dependency("java.util.Iterable", "iter", asList(new TypeParameter("java.lang.Float"))));
+
+        // then
+        assertThat(resolver.resolve("pre ${dependencyType} post"))
+                .isEqualTo("pre ${IterableType:newType(java.util.Iterable)}<${FloatType:newType(java.lang.Float)}> post");
+    }
+
+    @Test
+    public void should_add_several_type_parameters() throws Exception
+    {
+        // given
+        dependencies.add(new Dependency("java.util.Map", "map", asList(new TypeParameter("java.lang.String"), new TypeParameter("java.lang.Float"))));
+
+        // then
+        assertThat(resolver.resolve("pre ${dependencyType} post"))
+                .isEqualTo("pre ${MapType:newType(java.util.Map)}<${StringType:newType(java.lang.String)},${FloatType:newType(java.lang.Float)}> post");
+    }
+
+    @Test
+    public void should_add_several_nested_type_parameters() throws Exception
+    {
+        // given
+        dependencies.add(new Dependency("java.util.Map", "aMap", asList(new TypeParameter("java.util.List", asList(new TypeParameter("java.lang.Double"))),
+                                                                        new TypeParameter("java.util.Set", asList(new TypeParameter("java.lang.String"))))));
+
+        // then
+        assertThat(resolver.resolve("pre ${dependencyType} post"))
+                .isEqualTo("pre ${MapType:newType(java.util.Map)}<"
+                           + "${ListType:newType(java.util.List)}<${DoubleType:newType(java.lang.Double)}>"
+                           + ",${SetType:newType(java.util.Set)}<${StringType:newType(java.lang.String)}>"
+                           + "> post");
     }
 }
