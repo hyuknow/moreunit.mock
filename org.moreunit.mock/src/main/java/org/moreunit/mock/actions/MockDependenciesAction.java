@@ -1,7 +1,12 @@
 package org.moreunit.mock.actions;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
@@ -13,10 +18,11 @@ import org.moreunit.mock.templates.MockingTemplateException;
 import org.moreunit.mock.templates.MockingTemplateStore;
 import org.moreunit.mock.templates.TemplateProcessor;
 import org.moreunit.mock.utils.ConversionUtils;
+import org.moreunit.util.PluginTools;
 
 import com.google.inject.Inject;
 
-public class MockDependenciesAction implements IEditorActionDelegate
+public class MockDependenciesAction extends AbstractHandler implements IEditorActionDelegate
 {
     private final MockingTemplateStore mockingTemplateStore;
     private final TemplateProcessor templateApplicator;
@@ -40,8 +46,38 @@ public class MockDependenciesAction implements IEditorActionDelegate
         compilationUnit = targetEditor == null ? null : conversionUtils.getCompilationUnit(targetEditor);
     }
 
+    public Object execute(ExecutionEvent event) throws ExecutionException
+    {
+        IEditorPart openEditorPart = PluginTools.getOpenEditorPart();
+        if(openEditorPart == null)
+        {
+            return null;
+        }
+
+        IFile openFile = conversionUtils.getFile(openEditorPart);
+        if(openFile == null)
+        {
+            return null;
+        }
+
+        compilationUnit = JavaCore.createCompilationUnitFrom(openFile);
+
+        execute();
+        return null;
+    }
+
     public void run(IAction action)
     {
+        execute();
+    }
+
+    public void execute()
+    {
+        if(compilationUnit == null)
+        {
+            return;
+        }
+
         MockingTemplate template = getTemplate();
         if(template == null)
         {

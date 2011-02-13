@@ -3,6 +3,25 @@
 <plugin>
 
    <extension
+         point="org.eclipse.ui.commands">
+      <command
+            name="Mock Dependencies in Test Case..."
+            defaultHandler="org.moreunit.mock.actions.ExtensionFactory:org.moreunit.mock.actions.MockDependenciesAction"
+            description=""
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.moreunit.mock.commands.mockDependencies" />
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+         sequence="CTRL+ALT+SHIFT+M"
+         commandId="org.moreunit.mock.commands.mockDependencies"
+         contextId="org.eclipse.jdt.ui.javaEditorScope"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+   </extension>
+      
+   <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
             targetID="#CompilationUnitEditorContext"
@@ -11,8 +30,8 @@
                label="Mock Dependencies in Test Case..."
                class="org.moreunit.mock.actions.ExtensionFactory"
                menubarPath="org.moreunit.ui.editor.menu.moreunit/group2"
-               id="org.moreunit.mock.actions.MockDependenciesAction">
-         </action>
+               id="org.moreunit.mock.actions.MockDependenciesAction"
+               definitionId="org.moreunit.mock.commands.mockDependencies" />
       </viewerContribution>
    </extension>
    
