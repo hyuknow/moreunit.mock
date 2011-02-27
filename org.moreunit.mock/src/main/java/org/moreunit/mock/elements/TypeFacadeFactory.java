@@ -9,10 +9,7 @@ public class TypeFacadeFactory
 {
     public boolean isTestCase(ICompilationUnit compilationUnit)
     {
-        return TypeFacade.isTestCase(compilationUnit.findPrimaryType());
-        // TODO Nicolas: restore the following as soon as MoreUnit 2.3.0 is
-        // released:
-        // return TypeFacade.isTestCase(compilationUnit);
+        return TypeFacade.isTestCase(compilationUnit);
     }
 
     public TypeFacade createFacade(ICompilationUnit compilationUnit)

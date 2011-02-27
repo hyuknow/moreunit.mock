@@ -3,57 +3,29 @@ package org.moreunit.mock.model;
 import static org.moreunit.mock.utils.Strings.emptyIfNull;
 
 import java.text.Collator;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "mocking-template")
-public class MockingTemplate implements Comparable<MockingTemplate>
+@XmlRootElement(name = "category")
+public class Category implements Comparable<Category>
 {
     @XmlAttribute(required = true, name = "id")
     private String id;
 
-    @XmlAttribute(required = true, name = "category")
-    private String categoryId;
-
     @XmlAttribute(required = true, name = "name")
     private String name;
 
-    @XmlElementRefs(value = { @XmlElementRef(type = CodeTemplate.class) })
-    private List<CodeTemplate> codeTemplates;
-
     @SuppressWarnings("unused")
-    private MockingTemplate()
+    private Category()
     {
         // used by XML unmarshaller
     }
 
-    /**
-     * For testing only.
-     */
-    public MockingTemplate(String id)
+    public Category(String id, String name)
     {
         this.id = id;
-    }
-
-    /**
-     * For testing only.
-     */
-    public MockingTemplate(String id, String categoryId)
-    {
-        this.id = id;
-        this.categoryId = categoryId;
-    }
-
-    public MockingTemplate(String id, String categoryId, String name, List<CodeTemplate> codeTemplates)
-    {
-        this.id = id;
-        this.categoryId = categoryId;
         this.name = name;
-        this.codeTemplates = codeTemplates;
     }
 
     public String id()
@@ -61,25 +33,15 @@ public class MockingTemplate implements Comparable<MockingTemplate>
         return id;
     }
 
-    public String categoryId()
-    {
-        return categoryId;
-    }
-
     public String name()
     {
         return name;
     }
 
-    public List<CodeTemplate> codeTemplates()
-    {
-        return codeTemplates;
-    }
-
     @Override
     public String toString()
     {
-        return String.format("MockingTemplate [id=%s, category=%s]", id, categoryId);
+        return String.format("Category [id=%s]", id);
     }
 
     @Override
@@ -106,7 +68,7 @@ public class MockingTemplate implements Comparable<MockingTemplate>
         {
             return false;
         }
-        MockingTemplate other = (MockingTemplate) obj;
+        Category other = (Category) obj;
         if(id == null)
         {
             if(other.id != null)
@@ -121,8 +83,8 @@ public class MockingTemplate implements Comparable<MockingTemplate>
         return true;
     }
 
-    public int compareTo(MockingTemplate otherTemplate)
+    public int compareTo(Category otherCategory)
     {
-        return Collator.getInstance().compare(emptyIfNull(name), emptyIfNull(otherTemplate.name));
+        return Collator.getInstance().compare(emptyIfNull(name), emptyIfNull(otherCategory.name));
     }
 }

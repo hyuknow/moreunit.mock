@@ -14,6 +14,7 @@ import org.eclipse.ui.IEditorPart;
 import org.moreunit.mock.elements.TypeFacadeFactory;
 import org.moreunit.mock.log.Logger;
 import org.moreunit.mock.model.MockingTemplate;
+import org.moreunit.mock.preferences.Preferences;
 import org.moreunit.mock.templates.MockingTemplateException;
 import org.moreunit.mock.templates.MockingTemplateStore;
 import org.moreunit.mock.templates.TemplateProcessor;
@@ -24,6 +25,7 @@ import com.google.inject.Inject;
 
 public class MockDependenciesAction extends AbstractHandler implements IEditorActionDelegate
 {
+    private final Preferences preferences;
     private final MockingTemplateStore mockingTemplateStore;
     private final TemplateProcessor templateApplicator;
     private final ConversionUtils conversionUtils;
@@ -32,8 +34,9 @@ public class MockDependenciesAction extends AbstractHandler implements IEditorAc
     private ICompilationUnit compilationUnit;
 
     @Inject
-    public MockDependenciesAction(MockingTemplateStore mockingTemplateStore, TemplateProcessor templateApplicator, ConversionUtils conversionUtils, TypeFacadeFactory facadeFactory, Logger logger)
+    public MockDependenciesAction(Preferences preferences, MockingTemplateStore mockingTemplateStore, TemplateProcessor templateApplicator, ConversionUtils conversionUtils, TypeFacadeFactory facadeFactory, Logger logger)
     {
+        this.preferences = preferences;
         this.mockingTemplateStore = mockingTemplateStore;
         this.templateApplicator = templateApplicator;
         this.conversionUtils = conversionUtils;
@@ -111,7 +114,7 @@ public class MockDependenciesAction extends AbstractHandler implements IEditorAc
 
     private MockingTemplate getTemplate()
     {
-        final String templateId = MockingTemplateStore.DEFAULT_TEMPLATE;
+        final String templateId = preferences.getMockingTemplate(compilationUnit.getJavaProject());
 
         MockingTemplate template = mockingTemplateStore.get(templateId);
         if(template == null)
@@ -119,7 +122,10 @@ public class MockDependenciesAction extends AbstractHandler implements IEditorAc
             logger.error("Template not found: " + templateId);
         }
 
-        logger.debug("MockDependenciesAction: retrieved template: " + template);
+        if(logger.debugEnabled())
+        {
+            logger.debug("MockDependenciesAction: retrieved template: " + template);
+        }
         return template;
     }
 

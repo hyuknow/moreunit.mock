@@ -1,13 +1,16 @@
 package org.moreunit.mock;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.moreunit.mock.MoreUnitMockPlugin.TEMPLATE_DIRECTORY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.moreunit.mock.log.Logger;
+import org.moreunit.mock.model.Category;
 import org.moreunit.mock.model.MockingTemplate;
 import org.moreunit.mock.model.MockingTemplates;
 import org.moreunit.mock.templates.MockingTemplateException;
@@ -51,7 +55,7 @@ public class MoreUnitMockPluginTest
         plugin.loadDefaultMockingTemplates();
 
         // then
-        verify(logger).error(anyString());
+        verify(logger, atLeastOnce()).error(anyString());
     }
 
     @Test
@@ -59,7 +63,7 @@ public class MoreUnitMockPluginTest
     {
         // given
         InputStream stream = new MockInputStream("<invalidDefinition />");
-        when(resourceLoader.getResourceAsStream(TEMPLATE_DIRECTORY + "mockitoWithAnnotationsAndJUnitRunner.xml")).thenReturn(stream);
+        when(resourceLoader.getResourceAsStream(TEMPLATE_DIRECTORY + "mockito.xml")).thenReturn(stream);
 
         MockingTemplateException testException = new MockingTemplateException("test excepstion");
         when(templateDefinitionReader.read(stream)).thenThrow(testException);
@@ -76,9 +80,9 @@ public class MoreUnitMockPluginTest
     {
         // given
         InputStream stream = new MockInputStream("<validDefinition />");
-        when(resourceLoader.getResourceAsStream(TEMPLATE_DIRECTORY + "mockitoWithAnnotationsAndJUnitRunner.xml")).thenReturn(stream);
+        when(resourceLoader.getResourceAsStream(TEMPLATE_DIRECTORY + "mockito.xml")).thenReturn(stream);
 
-        MockingTemplates expectedTemplates = new MockingTemplates(new MockingTemplate("template"));
+        MockingTemplates expectedTemplates = new MockingTemplates(new ArrayList<Category>(), asList(new MockingTemplate("template")));
         when(templateDefinitionReader.read(stream)).thenReturn(expectedTemplates);
 
         // when

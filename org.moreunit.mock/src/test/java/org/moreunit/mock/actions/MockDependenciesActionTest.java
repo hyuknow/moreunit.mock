@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.IAction;
@@ -24,6 +25,7 @@ import org.moreunit.elements.TestCaseTypeFacade;
 import org.moreunit.mock.elements.TypeFacadeFactory;
 import org.moreunit.mock.log.Logger;
 import org.moreunit.mock.model.MockingTemplate;
+import org.moreunit.mock.preferences.Preferences;
 import org.moreunit.mock.templates.MockingTemplateStore;
 import org.moreunit.mock.templates.TemplateProcessor;
 import org.moreunit.mock.utils.ConversionUtils;
@@ -31,6 +33,8 @@ import org.moreunit.mock.utils.ConversionUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class MockDependenciesActionTest
 {
+    @Mock
+    private Preferences preferences;
     @Mock
     private MockingTemplateStore templateStore;
     @Mock
@@ -44,17 +48,35 @@ public class MockDependenciesActionTest
     private MockDependenciesAction action;
 
     @Mock
+    private IJavaProject project;
+    @Mock
     private ICompilationUnit openCompilationUnit;
     private IAction anAction = null;
 
     @Before
     public void createAction() throws Exception
     {
-        action = new MockDependenciesAction(templateStore, templateApplicator, conversionUtils, facadeFactory, logger);
+        action = new MockDependenciesAction(preferences, templateStore, templateApplicator, conversionUtils, facadeFactory, logger);
+
+        when(project.getElementName()).thenReturn("test-project");
+        when(openCompilationUnit.getJavaProject()).thenReturn(project);
 
         IEditorPart activeEditor = mock(IEditorPart.class);
         when(conversionUtils.getCompilationUnit(activeEditor)).thenReturn(openCompilationUnit);
         action.setActiveEditor(null, activeEditor);
+    }
+
+    @Test
+    public void should_retrieve_template_from_preferences_for_compilation_unit_project() throws Exception
+    {
+        // given
+        when(preferences.getMockingTemplate(project)).thenReturn("test-template-id");
+
+        // when
+        action.run(anAction);
+
+        // then
+        verify(templateStore).get("test-template-id");
     }
 
     @Test

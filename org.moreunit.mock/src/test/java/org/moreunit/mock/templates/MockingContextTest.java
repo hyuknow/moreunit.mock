@@ -163,7 +163,7 @@ public class MockingContextTest
     private MockingTemplate templateRequiringBeforeMethod()
     {
         CodeTemplate templateRequiringBeforeMethod = new CodeTemplate("", Part.BEFORE_INSTANCE_METHOD, "");
-        return new MockingTemplate("", "", asList(templateRequiringBeforeMethod));
+        return new MockingTemplate("", "", "", asList(templateRequiringBeforeMethod));
     }
 
     @Test

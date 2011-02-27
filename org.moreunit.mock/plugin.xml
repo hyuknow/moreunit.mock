@@ -35,4 +35,42 @@
       </viewerContribution>
    </extension>
    
+   <extension
+         point="org.eclipse.ui.keywords">
+      <keyword id="org.moreunit.mock.keywords.mock" label="mock" />
+      <keyword id="org.moreunit.mock.keywords.dependencies" label="dependencies" />
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            id="org.moreunit.mock.preferences.MainPreferencePage"
+            category="org.moreunit.moreunitPreferencePage"
+            name="Mock Generation"
+            class="org.moreunit.mock.actions.ExtensionFactory">
+         <keywordReference id="org.moreunit.mock.keywords.mock" />
+         <keywordReference id="org.moreunit.mock.keywords.dependencies" />
+      </page>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            id="org.moreunit.mock.preferences.MainPropertyPage"
+            category="org.moreunit.properties"
+            name="Mock Generation"
+            class="org.moreunit.mock.actions.ExtensionFactory">
+         <keywordReference id="org.moreunit.mock.keywords.mock" />
+         <keywordReference id="org.moreunit.mock.keywords.dependencies" />
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="org.eclipse.jdt.core.javanature" />
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+   
 </plugin>
